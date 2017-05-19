@@ -1,6 +1,5 @@
 package actor;
 
-import process.Parameters;
 import process.Rebellion;
 import world.IWorld;
 
@@ -16,27 +15,16 @@ public class Agent extends Person {
 
 	private boolean individual_legitimacy;
 
-	private double individual_legitimacy_increase_factor;
-
 	private double government_legitimacy;
 
-	public Agent(IWorld<Person> world, int vision, boolean individual_legitimacy,
-			double individual_legitimacy_increase_factor, double government_legitimacy) {
+	public Agent(IWorld<Person> world, int vision, boolean individual_legitimacy, double government_legitimacy) {
 		super(world, vision);
 		rebel = false;
 		jail_term = 0;
 		this.risk_aversion = random.nextDouble();
 		this.perceived_hardship = random.nextDouble();
 		this.individual_legitimacy = individual_legitimacy;
-		this.individual_legitimacy_increase_factor = individual_legitimacy_increase_factor;
 		this.government_legitimacy = government_legitimacy;
-	}
-
-	@Override
-	public void move() {
-		if (Parameters.MOVEMENT) {
-			world.move(this, vision);
-		}
 	}
 
 	@Override
@@ -89,7 +77,7 @@ public class Agent extends Person {
 			long nearAgents = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Agent).count();
 			long nearJailedAgents = world.neighbourhoodOf(this, vision).stream()
 					.filter(p -> p instanceof Agent && !p.isActive()).count();
-			legitimacy = individual_legitimacy_increase_factor * (nearJailedAgents / nearAgents);
+			legitimacy = (1 + (nearJailedAgents / nearAgents)) * government_legitimacy;
 		} else {
 			legitimacy = government_legitimacy;
 		}

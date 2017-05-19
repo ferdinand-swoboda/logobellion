@@ -20,11 +20,6 @@ public class Cop extends Person {
 	}
 
 	@Override
-	public void move() {
-		this.world.move(this, vision);
-	}
-
-	@Override
 	public void act() {
 		List<Person> neighbours = this.world.neighbourhoodOf(this, vision);
 		neighbours = neighbours.stream().filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel())

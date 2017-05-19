@@ -14,13 +14,13 @@ public class Rebellion {
 	public static double threshold = 0.1;
 	public static double k = 2.3;
 
-	// should all be disjunct
 	private HashMap<Integer, Integer> numQuietAgents;
 
 	private HashMap<Integer, Integer> numJailedAgents;
 
 	private HashMap<Integer, Integer> numRebels;
 
+	// all agent types are disjunct
 	private LinkedList<Agent> quietAgents;
 
 	private LinkedList<Agent> jailedAgents;
@@ -31,24 +31,24 @@ public class Rebellion {
 
 	private IWorld<Person> world;
 
-	public Rebellion() {
+	public Rebellion(int worldDimension) {
 		numQuietAgents = new HashMap<Integer, Integer>();
 		numJailedAgents = new HashMap<Integer, Integer>();
 		numRebels = new HashMap<Integer, Integer>();
 		quietAgents = new LinkedList<Agent>();
 		jailedAgents = new LinkedList<Agent>();
 		rebels = new LinkedList<Agent>();
-		world = new World<Person>(50);
+		world = new World<Person>(worldDimension);
 		cops = new LinkedList<Cop>();
 	}
 
 	public static void main(String[] args) {
 
 		// TODO make it parameterized
-		Rebellion rebellion = new Rebellion();
+		Rebellion rebellion = new Rebellion(Parameters.DIMENSION);
 		rebellion.readParameters(args);
 		rebellion.setup();
-		rebellion.go(20);
+		rebellion.go(Parameters.TICKS);
 		rebellion.saveResults();
 
 	}
@@ -67,7 +67,7 @@ public class Rebellion {
 
 		for (int i = 0; i < numberAgents; i++) {
 			Agent agent = new Agent(world, Parameters.VISION, Parameters.INDIVIDUAL_LEGITIMACY,
-					Parameters.INDIVIDUAL_LEGITIMACY_INCREASE_FACTOR, Parameters.GOVERNMENT_LEGITIMACY);
+					Parameters.GOVERNMENT_LEGITIMACY);
 			quietAgents.add(agent);
 			world.add(agent);
 		}
@@ -123,8 +123,45 @@ public class Rebellion {
 
 	}
 
+	// parameters have to be declared in the form
+	// -<parameter.name>=<parameter.value> ...
 	private void readParameters(String[] args) {
-		Parameters.VISION = 7;
+		for (int i = 0; i < args.length; i++) {
+
+			String[] parts = args[i].split("=");
+			String parameterName = parts[0].substring(1);
+
+			switch (parameterName) {
+			case "initial_cop_density":
+				Parameters.INITIAL_COP_DENSITY = Double.parseDouble(parts[1]);
+				break;
+			case "initial_agent_density":
+				Parameters.INITIAL_AGENT_DENSITY = Double.parseDouble(parts[1]);
+				break;
+			case "vision":
+				Parameters.VISION = Integer.parseInt(parts[1]);
+				break;
+			case "government_legitimacy":
+				Parameters.GOVERNMENT_LEGITIMACY = Double.parseDouble(parts[1]);
+				break;
+			case "max_jail_term":
+				Parameters.MAX_JAIL_TERM = Integer.parseInt(parts[1]);
+				break;
+			case "movement":
+				Parameters.MOVEMENT = Boolean.parseBoolean(parts[1]);
+				break;
+			case "individual_legitimacy":
+				Parameters.INDIVIDUAL_LEGITIMACY = Boolean.parseBoolean(parts[1]);
+				break;
+			case "ticks":
+				Parameters.TICKS = Integer.parseInt(parts[1]);
+				break;
+			case "dimension":
+				Parameters.DIMENSION = Integer.parseInt(parts[1]);
+			default:
+				System.out.println("The parameter " + parameterName + " you entered is invalid");
+			}
+		}
 	}
 
 }

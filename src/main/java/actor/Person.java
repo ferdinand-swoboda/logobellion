@@ -19,7 +19,9 @@ public abstract class Person implements IEntity {
 		this.random = new Random();
 	}
 
-	public abstract void move();
+	public void move() {
+		world.move(this, vision);
+	}
 
 	public abstract void act();
 }
