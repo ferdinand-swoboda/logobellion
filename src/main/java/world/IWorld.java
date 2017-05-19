@@ -14,4 +14,8 @@ public interface IWorld<T extends IEntity> {
 
 	List<T> neighbourhoodOf(T entity, int scope);
 
+	int getDimension();
+
+	void setDimension(int dimension);
+
 }

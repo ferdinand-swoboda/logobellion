@@ -91,6 +91,14 @@ public class World<T extends IEntity> implements IWorld<T> {
 		return neighbours;
 	}
 
+	public int getDimension() {
+		return dimension;
+	}
+
+	public void setDimension(int dimension) {
+		this.dimension = dimension;
+	}
+
 	private void moveTo(T entity, Patch<T> newPatch) {
 		Patch<T> oldPatch = entityIndex.remove(entity);
 		oldPatch.removeOccupant(entity);
@@ -99,6 +107,7 @@ public class World<T extends IEntity> implements IWorld<T> {
 		entityIndex.put(entity, newPatch);
 	}
 
+	// TODO refactor
 	private LinkedList<Patch<T>> nearPatchesOf(T entity, int scope) {
 		LinkedList<Patch<T>> nearPatches = new LinkedList<Patch<T>>();
 		Patch<T> origin = entityIndex.get(entity);
