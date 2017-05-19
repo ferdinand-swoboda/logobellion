@@ -20,12 +20,7 @@ public class Rebellion {
 
 	private HashMap<Integer, Integer> numRebels;
 
-	// all agent types are disjunct
-	private LinkedList<Agent> quietAgents;
-
-	private LinkedList<Agent> jailedAgents;
-
-	private LinkedList<Agent> rebels;
+	private LinkedList<Agent> agents;
 
 	private LinkedList<Cop> cops;
 
@@ -35,21 +30,18 @@ public class Rebellion {
 		numQuietAgents = new HashMap<Integer, Integer>();
 		numJailedAgents = new HashMap<Integer, Integer>();
 		numRebels = new HashMap<Integer, Integer>();
-		quietAgents = new LinkedList<Agent>();
-		jailedAgents = new LinkedList<Agent>();
-		rebels = new LinkedList<Agent>();
+		agents = new LinkedList<Agent>();
 		world = new World<Person>(worldDimension);
 		cops = new LinkedList<Cop>();
 	}
 
 	public static void main(String[] args) {
 
-		// TODO make it parameterized
+		readParameters(args);
 		Rebellion rebellion = new Rebellion(Parameters.DIMENSION);
-		rebellion.readParameters(args);
 		rebellion.setup();
 		rebellion.go(Parameters.TICKS);
-		rebellion.saveResults();
+		rebellion.storeTimeSeries();
 
 	}
 
@@ -68,64 +60,27 @@ public class Rebellion {
 		for (int i = 0; i < numberAgents; i++) {
 			Agent agent = new Agent(world, Parameters.VISION, Parameters.INDIVIDUAL_LEGITIMACY,
 					Parameters.GOVERNMENT_LEGITIMACY);
-			quietAgents.add(agent);
+			agents.add(agent);
 			world.add(agent);
 		}
 
 	}
 
 	public void go(int ticks) {
-		for (int i = 0; i < ticks; i++) {
+		save(0);
+		for (int i = 1; i <= ticks; i++) {
 			tick();
+			save(i);
 		}
 	}
 
-	public void saveResults() {
+	public void storeTimeSeries() {
 		// TODO store results in a NetLogo-compatible csv file
-	}
-
-	private void tick() {
-
-		// TODO update lists after each tick
-		// movement rule
-		if (Parameters.MOVEMENT) {
-			for (Agent agent : quietAgents) {
-				agent.move();
-			}
-
-			for (Agent rebel : rebels) {
-				rebel.move();
-			}
-		}
-
-		for (Cop cop : cops) {
-			cop.move();
-		}
-
-		// agent rule
-		for (Agent agent : quietAgents) {
-			agent.act();
-		}
-
-		for (Agent rebel : rebels) {
-			rebel.act();
-		}
-
-		// cop rule
-		for (Cop c : cops) {
-			c.act();
-		}
-
-		// reduce jail time
-		for (Agent agent : jailedAgents) {
-			agent.decreaseJailTerm();
-		}
-
 	}
 
 	// parameters have to be declared in the form
 	// -<parameter.name>=<parameter.value> ...
-	private void readParameters(String[] args) {
+	private static void readParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 
 			String[] parts = args[i].split("=");
@@ -162,6 +117,47 @@ public class Rebellion {
 				System.out.println("The parameter " + parameterName + " you entered is invalid");
 			}
 		}
+	}
+
+	private void tick() {
+
+		// movement rule
+		if (Parameters.MOVEMENT) {
+			agents.stream().forEach(Agent::move);
+		}
+		cops.stream().forEach(Cop::move);
+
+		// agent rule
+		agents.stream().forEach(Agent::act);
+
+		// cop rule
+		cops.stream().forEach(Cop::act);
+
+		// reduce jail time of (jailed) agents
+		agents.stream().forEach(Agent::decreaseJailTerm);
+
+	}
+
+	// save current state in time series
+	private void save(int tick) {
+		int numQuietAgents = 0;
+		int numJailedAgents = 0;
+		int numRebels = 0;
+
+		// different agent types are disjunct
+		for (Agent agent : agents) {
+			if (agent.isRebel()) {
+				numRebels++;
+			} else if (agent.isActive()) {
+				numQuietAgents++;
+			} else {
+				numJailedAgents++;
+			}
+		}
+
+		this.numQuietAgents.put(tick, numQuietAgents);
+		this.numJailedAgents.put(tick, numJailedAgents);
+		this.numRebels.put(tick, numRebels);
 	}
 
 }

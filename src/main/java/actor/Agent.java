@@ -28,8 +28,19 @@ public class Agent extends Person {
 	}
 
 	@Override
+	public void move() {
+		// only move if not jailed
+		if (jail_term == 0) {
+			super.move();
+		}
+	}
+
+	@Override
 	public void act() {
-		rebel = (grievance() > net_risk() + Rebellion.threshold) ? true : false;
+		// only act if not jailed
+		if (jail_term == 0) {
+			rebel = (grievance() > net_risk() + Rebellion.threshold) ? true : false;
+		}
 	}
 
 	@Override
