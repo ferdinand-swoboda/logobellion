@@ -1,2 +1,2 @@
 # logobellion
-A Java implementation of the NetLogo model "Rebellion"
+An extended Java implementation of the NetLogo model "Rebellion"
