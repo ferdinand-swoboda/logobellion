@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 
 import world.IWorld;
 
-public class Cop extends Person {
+public class Cop extends Turtle {
 
 	private int max_jail_term;
 
-	public Cop(IWorld<Person> world, int vision, int max_jail_term) {
+	public Cop(IWorld<Turtle> world, int vision, int max_jail_term) {
 		super(world, vision);
 		this.max_jail_term = max_jail_term;
 	}
@@ -22,7 +22,7 @@ public class Cop extends Person {
 
 	@Override
 	public void act() {
-		List<? extends Person> neighbours = this.world.neighbourhoodOf(this, vision);
+		List<? extends Turtle> neighbours = this.world.neighbourhoodOf(this, vision);
 		neighbours = neighbours.stream().filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel())
 				.collect(Collectors.toList());
 		Agent suspect = (Agent) neighbours.get(ThreadLocalRandom.current().nextInt(neighbours.size()));

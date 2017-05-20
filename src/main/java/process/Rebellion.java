@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import actor.Agent;
 import actor.Cop;
-import actor.Person;
+import actor.Turtle;
 import world.IWorld;
 import world.World;
 
@@ -28,14 +28,14 @@ public class Rebellion {
 
 	private LinkedList<Cop> cops;
 
-	private IWorld<Person> world;
+	private IWorld<Turtle> world;
 
 	public Rebellion(int worldDimension) {
 		numQuietAgents = new HashMap<Integer, Integer>();
 		numJailedAgents = new HashMap<Integer, Integer>();
 		numRebels = new HashMap<Integer, Integer>();
 		agents = new LinkedList<Agent>();
-		world = new World<Person>(worldDimension);
+		world = new World<Turtle>(worldDimension);
 		cops = new LinkedList<Cop>();
 	}
 
@@ -66,8 +66,8 @@ public class Rebellion {
 			agents.add(agent);
 		}
 
-		List<Person> persons = Stream.concat(cops.stream(), agents.stream()).collect(Collectors.toList());
-		world.enter(persons);
+		List<Turtle> turtles = Stream.concat(cops.stream(), agents.stream()).collect(Collectors.toList());
+		world.enter(turtles);
 
 	}
 
@@ -126,16 +126,16 @@ public class Rebellion {
 
 	private void tick() {
 
-		List<Person> persons = Stream.concat(agents.stream(), cops.stream()).collect(Collectors.toList());
-		Collections.shuffle(persons);
+		List<Turtle> turtles = Stream.concat(agents.stream(), cops.stream()).collect(Collectors.toList());
+		Collections.shuffle(turtles);
 
 		// randomly go through all persons
-		for (Person person : persons) {
+		for (Turtle turtle : turtles) {
 			// movement rule
-			person.move();
+			turtle.move();
 
 			// agent rule and cop rule
-			person.act();
+			turtle.act();
 		}
 
 		// reduce jail time of (jailed) agents

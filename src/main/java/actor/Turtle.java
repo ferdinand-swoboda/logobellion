@@ -3,13 +3,13 @@ package actor;
 import world.IEntity;
 import world.IWorld;
 
-public abstract class Person implements IEntity {
+public abstract class Turtle implements IEntity {
 
-	protected IWorld<Person> world;
+	protected IWorld<Turtle> world;
 
 	protected int vision;
 
-	public Person(IWorld<Person> world, int vision) {
+	public Turtle(IWorld<Turtle> world, int vision) {
 		this.world = world;
 		this.vision = vision;
 	}

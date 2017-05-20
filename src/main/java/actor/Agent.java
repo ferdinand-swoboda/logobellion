@@ -6,7 +6,7 @@ import process.Parameters;
 import process.Rebellion;
 import world.IWorld;
 
-public class Agent extends Person {
+public class Agent extends Turtle {
 
 	private boolean rebel;
 
@@ -20,7 +20,7 @@ public class Agent extends Person {
 
 	private double government_legitimacy;
 
-	public Agent(IWorld<Person> world, int vision, boolean individual_legitimacy, double government_legitimacy) {
+	public Agent(IWorld<Turtle> world, int vision, boolean individual_legitimacy, double government_legitimacy) {
 		super(world, vision);
 		rebel = false;
 		jail_term = 0;
