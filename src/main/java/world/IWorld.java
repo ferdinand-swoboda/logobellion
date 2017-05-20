@@ -16,6 +16,4 @@ public interface IWorld<T extends IEntity> {
 
 	int getDimension();
 
-	void setDimension(int dimension);
-
 }

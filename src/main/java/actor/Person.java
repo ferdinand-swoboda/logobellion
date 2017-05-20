@@ -24,4 +24,5 @@ public abstract class Person implements IEntity {
 	}
 
 	public abstract void act();
+
 }

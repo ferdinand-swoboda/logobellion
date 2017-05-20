@@ -1,30 +1,28 @@
 package world;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class World<T extends IEntity> implements IWorld<T> {
 
 	private Random random;
 
-	private int dimension;
-
 	// TODO enable synchronous updates
 	private Patch<T>[][] globe;
 
-	private TreeMap<T, Patch<T>> entityIndex;
+	private Hashtable<T, Patch<T>> entityIndex;
 
 	private ArrayList<Patch<T>> freePatches;
 
 	public World(int dimension) {
-		this.dimension = dimension;
 		random = new Random();
-		entityIndex = new TreeMap<T, Patch<T>>();
+		entityIndex = new Hashtable<T, Patch<T>>();
 		freePatches = new ArrayList<Patch<T>>();
+		this.globe = new Patch[dimension][dimension];
 
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
@@ -91,12 +89,9 @@ public class World<T extends IEntity> implements IWorld<T> {
 		return neighbours;
 	}
 
+	@Override
 	public int getDimension() {
-		return dimension;
-	}
-
-	public void setDimension(int dimension) {
-		this.dimension = dimension;
+		return globe.length;
 	}
 
 	private void moveTo(T entity, Patch<T> newPatch) {
@@ -126,9 +121,9 @@ public class World<T extends IEntity> implements IWorld<T> {
 		if (diff >= 0) {
 			startX = origin.getxCoordinate() - scope;
 
-			diff = dimension - startX + (2 * scope);
+			diff = this.getDimension() - startX + (2 * scope);
 			if (diff < 0) {
-				endX = dimension - 1;
+				endX = this.getDimension() - 1;
 				startX2 = 0;
 				endX2 = diff;
 			} else {
@@ -138,17 +133,17 @@ public class World<T extends IEntity> implements IWorld<T> {
 		} else {
 			startX = 0;
 			endX = startX + (2 * scope) - Math.abs(origin.getxCoordinate() - scope);
-			startX2 = dimension - Math.abs(origin.getxCoordinate() - scope);
-			endX2 = dimension - 1;
+			startX2 = this.getDimension() - Math.abs(origin.getxCoordinate() - scope);
+			endX2 = this.getDimension() - 1;
 		}
 
 		diff = origin.getyCoordinate() - scope;
 		if (diff >= 0) {
 			startY = origin.getyCoordinate() - scope;
 
-			diff = dimension - startY + (2 * scope);
+			diff = this.getDimension() - startY + (2 * scope);
 			if (diff < 0) {
-				endY = dimension - 1;
+				endY = this.getDimension() - 1;
 				startY2 = 0;
 				endY2 = diff;
 			} else {
@@ -158,8 +153,8 @@ public class World<T extends IEntity> implements IWorld<T> {
 		} else {
 			startY = 0;
 			endY = startY + (2 * scope) - Math.abs(origin.getyCoordinate() - scope);
-			startY2 = dimension - Math.abs(origin.getyCoordinate() - scope);
-			endY2 = dimension - 1;
+			startY2 = getDimension() - Math.abs(origin.getyCoordinate() - scope);
+			endY2 = getDimension() - 1;
 		}
 
 		nearPatches.addAll(getPatchfield(startX, startY, endX, endY));
