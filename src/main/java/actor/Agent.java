@@ -2,6 +2,7 @@ package actor;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import process.Parameters;
 import process.Rebellion;
 import world.IWorld;
 
@@ -31,8 +32,8 @@ public class Agent extends Person {
 
 	@Override
 	public void move() {
-		// only move if not jailed
-		if (jail_term == 0) {
+		// only move if not jailed and MOVEMENT enabled
+		if (jail_term == 0 && Parameters.MOVEMENT) {
 			super.move();
 		}
 	}

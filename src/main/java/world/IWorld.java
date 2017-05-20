@@ -8,8 +8,6 @@ public interface IWorld<T extends IEntity> {
 
 	void clear();
 
-	void synchronise();
-
 	void move(T entity, int scope);
 
 	void moveTo(T entity, T target);

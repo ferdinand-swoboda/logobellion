@@ -1,5 +1,6 @@
 package process;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +68,6 @@ public class Rebellion {
 
 		List<Person> persons = Stream.concat(cops.stream(), agents.stream()).collect(Collectors.toList());
 		world.enter(persons);
-		world.synchronise();
 
 	}
 
@@ -126,19 +126,17 @@ public class Rebellion {
 
 	private void tick() {
 
-		// movement rule
-		if (Parameters.MOVEMENT) {
-			agents.stream().forEach(Agent::move);
+		List<Person> persons = Stream.concat(agents.stream(), cops.stream()).collect(Collectors.toList());
+		Collections.shuffle(persons);
+
+		// randomly go through all persons
+		for (Person person : persons) {
+			// movement rule
+			person.move();
+
+			// agent rule and cop rule
+			person.act();
 		}
-		cops.stream().forEach(Cop::move);
-
-		// agent rule
-		agents.stream().forEach(Agent::act);
-
-		// cop rule
-		cops.stream().forEach(Cop::act);
-
-		world.synchronise();
 
 		// reduce jail time of (jailed) agents
 		agents.stream().forEach(Agent::decreaseJailTerm);
