@@ -1,5 +1,7 @@
 package actor;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import process.Rebellion;
 import world.IWorld;
 
@@ -21,8 +23,8 @@ public class Agent extends Person {
 		super(world, vision);
 		rebel = false;
 		jail_term = 0;
-		this.risk_aversion = random.nextDouble();
-		this.perceived_hardship = random.nextDouble();
+		this.risk_aversion = ThreadLocalRandom.current().nextDouble();
+		this.perceived_hardship = ThreadLocalRandom.current().nextDouble();
 		this.individual_legitimacy = individual_legitimacy;
 		this.government_legitimacy = government_legitimacy;
 	}
@@ -79,19 +81,25 @@ public class Agent extends Person {
 	}
 
 	private double grievance() {
-		return this.perceived_hardship * (1 - this.governmentLegitimacy());
+		return this.perceived_hardship * (1 - this.legitimacy());
 	}
 
-	private double governmentLegitimacy() {
+	private double legitimacy() {
 		double legitimacy;
 		if (individual_legitimacy) {
-			long nearAgents = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Agent).count();
-			long nearJailedAgents = world.neighbourhoodOf(this, vision).stream()
-					.filter(p -> p instanceof Agent && !p.isActive()).count();
-			legitimacy = (1 + (nearJailedAgents / nearAgents)) * government_legitimacy;
+			legitimacy = individualLegitimacy();
 		} else {
 			legitimacy = government_legitimacy;
 		}
+		return legitimacy;
+	}
+
+	private double individualLegitimacy() {
+		double legitimacy;
+		long nearAgents = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Agent).count();
+		long nearJailedAgents = world.neighbourhoodOf(this, vision).stream()
+				.filter(p -> p instanceof Agent && !p.isActive()).count();
+		legitimacy = (1 + (nearJailedAgents / nearAgents)) * government_legitimacy;
 		return legitimacy;
 	}
 

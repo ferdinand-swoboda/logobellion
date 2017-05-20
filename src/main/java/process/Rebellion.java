@@ -2,6 +2,9 @@ package process;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import actor.Agent;
 import actor.Cop;
@@ -51,7 +54,6 @@ public class Rebellion {
 		for (int i = 0; i < numberCops; i++) {
 			Cop cop = new Cop(world, Parameters.VISION, Parameters.MAX_JAIL_TERM);
 			cops.add(cop);
-			world.add(cop);
 		}
 
 		int numberAgents = (int) Math
@@ -61,8 +63,11 @@ public class Rebellion {
 			Agent agent = new Agent(world, Parameters.VISION, Parameters.INDIVIDUAL_LEGITIMACY,
 					Parameters.GOVERNMENT_LEGITIMACY);
 			agents.add(agent);
-			world.add(agent);
 		}
+
+		List<Person> persons = Stream.concat(cops.stream(), agents.stream()).collect(Collectors.toList());
+		world.enter(persons);
+		world.synchronise();
 
 	}
 
@@ -132,6 +137,8 @@ public class Rebellion {
 
 		// cop rule
 		cops.stream().forEach(Cop::act);
+
+		world.synchronise();
 
 		// reduce jail time of (jailed) agents
 		agents.stream().forEach(Agent::decreaseJailTerm);

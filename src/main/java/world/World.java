@@ -1,111 +1,153 @@
 package world;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class World<T extends IEntity> implements IWorld<T> {
 
-	private Random random;
+	private Patch<T>[][] currentGlobe;
 
-	// TODO enable synchronous updates
-	private Patch<T>[][] globe;
+	private Patch<T>[][] oldGlobe;
 
-	private Hashtable<T, Patch<T>> entityIndex;
+	private Hashtable<T, Patch<T>> currentEntityIndex;
 
-	private ArrayList<Patch<T>> freePatches;
+	private Hashtable<T, Patch<T>> oldEntityIndex;
+
+	private List<Patch<T>> currentFreePatches;
+
+	private List<Patch<T>> oldFreePatches;
 
 	public World(int dimension) {
-		random = new Random();
-		entityIndex = new Hashtable<T, Patch<T>>();
-		freePatches = new ArrayList<Patch<T>>();
-		this.globe = new Patch[dimension][dimension];
+		this.currentGlobe = new Patch[dimension][dimension];
+		this.oldGlobe = new Patch[dimension][dimension];
+		this.currentEntityIndex = new Hashtable<T, Patch<T>>();
+		this.oldEntityIndex = new Hashtable<T, Patch<T>>();
+		this.currentFreePatches = new LinkedList<Patch<T>>();
+		this.oldFreePatches = new LinkedList<Patch<T>>();
 
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				globe[i][j] = new Patch<T>(i, j);
-				freePatches.add(globe[i][j]);
+				currentGlobe[i][j] = new Patch<T>(i, j);
+				oldGlobe[i][j] = new Patch<T>(i, j);
+				currentFreePatches.add(currentGlobe[i][j]);
+				oldFreePatches.add(oldGlobe[i][j]);
 			}
-			;
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see world.IWorld#add(T)
-	 */
 	@Override
-	public void add(T entity) {
-		if (!entityIndex.containsKey(entity)) {
-			int index = random.nextInt(freePatches.size());
-			Patch<T> patch = freePatches.get(index);
+	public void enter(List<? extends T> entities) {
+		Collections.shuffle(currentFreePatches);
+		Iterator<Patch<T>> iter = currentFreePatches.iterator();
+
+		for (T entity : entities) {
+			Patch<T> patch = iter.next();
 			patch.addOccupant(entity);
-			freePatches.remove(index);
-			entityIndex.put(entity, patch);
+			iter.remove();
+			currentEntityIndex.put(entity, patch);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see world.IWorld#remove(T)
-	 */
 	@Override
-	public void remove(T entity) {
-		Patch<T> patch = entityIndex.remove(entity);
-		if (patch != null) {
-			patch.removeOccupant(entity);
+	public void clear() {
+		currentEntityIndex.clear();
+		currentFreePatches.clear();
+		for (int i = 0; i < currentGlobe.length; i++) {
+			for (int j = 0; j < currentGlobe[i].length; j++) {
+				currentGlobe[i][j].clearOccupants();
+				currentFreePatches.add(currentGlobe[i][j]);
+			}
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see world.IWorld#move(T, int)
-	 */
-	@Override
-	public void move(T entity, int scope) {
-		List<Patch<T>> neighbourhood = this.nearPatchesOf(entity, scope);
-		List<Patch<T>> freeNeighbourPatches = neighbourhood.stream().filter((Patch<T> p) -> !p.containsActive())
-				.collect(Collectors.toList());
-		Patch<T> newPatch = freeNeighbourPatches.get(random.nextInt(freeNeighbourPatches.size()));
-
-		moveTo(entity, newPatch);
-	}
-
-	@Override
-	public void moveTo(T entity, T target) {
-		moveTo(entity, entityIndex.get(target));
-	}
-
-	@Override
-	public List<T> neighbourhoodOf(T entity, int scope) {
-		List<T> neighbours = nearPatchesOf(entity, scope).stream().map(Patch::getOccupants).flatMap(List::stream)
-				.collect(Collectors.toList());
-		return neighbours;
 	}
 
 	@Override
 	public int getDimension() {
-		return globe.length;
+		return currentGlobe.length;
 	}
 
-	private void moveTo(T entity, Patch<T> newPatch) {
-		Patch<T> oldPatch = entityIndex.remove(entity);
-		oldPatch.removeOccupant(entity);
+	@Override
+	public void move(T entity, int scope) {
+		Patch<T> patch = oldEntityIndex.get(entity);
 
+		List<Patch<T>> neighbourhood = this.nearPatchesOf(oldGlobe, patch.getxCoordinate(), patch.getyCoordinate(),
+				scope);
+		List<Patch<T>> freeNeighbourPatches = neighbourhood.stream().filter((Patch<T> p) -> !p.containsActive())
+				.collect(Collectors.toList());
+		Patch<T> newPatch = freeNeighbourPatches.get(ThreadLocalRandom.current().nextInt(freeNeighbourPatches.size()));
+
+		moveTo(entity, newPatch.getxCoordinate(), newPatch.getyCoordinate());
+	}
+
+	@Override
+	public void moveTo(T entity, T target) {
+		Patch<T> patch = oldEntityIndex.get(target);
+		moveTo(entity, patch.getxCoordinate(), patch.getyCoordinate());
+	}
+
+	@Override
+	public List<T> neighbourhoodOf(T entity, int scope) {
+		Patch<T> patch = oldEntityIndex.get(entity);
+
+		List<T> neighbours = nearPatchesOf(oldGlobe, patch.getxCoordinate(), patch.getyCoordinate(), scope).stream()
+				.map(Patch::getOccupants).flatMap(List::stream).collect(Collectors.toList());
+		return neighbours;
+	}
+
+	@Override
+	public void synchronise() {
+		// take a snapshot of the current globe state and reset the old state to
+		// the snapshot state
+		snapshot();
+	}
+
+	private void snapshot() {
+
+		oldFreePatches.clear();
+		oldEntityIndex.clear();
+		oldGlobe = new Patch[currentGlobe.length][currentGlobe.length];
+
+		// perform a deep copy of the current globe state; only entities are
+		// shallow copied
+		for (int i = 0; i < currentGlobe.length; i++) {
+			for (int j = 0; j < currentGlobe[i].length; j++) {
+
+				LinkedList<T> occupants = new LinkedList<T>();
+				occupants.addAll(currentGlobe[i][j].getOccupants());
+				oldGlobe[i][j] = new Patch<T>(i, j, occupants);
+
+				if (!oldGlobe[i][j].isOccupied()) {
+					oldFreePatches.add(oldGlobe[i][j]);
+				} else {
+					for (T entity : oldGlobe[i][j].getOccupants()) {
+						oldEntityIndex.put(entity, oldGlobe[i][j]);
+					}
+				}
+			}
+		}
+	}
+
+	private void moveTo(T entity, int xCoordinate, int yCoordinate) {
+		Patch<T> currentPatch = currentEntityIndex.remove(entity);
+		currentPatch.removeOccupant(entity);
+		if (!currentPatch.isOccupied()) {
+			currentFreePatches.add(currentPatch);
+		}
+
+		Patch<T> newPatch = currentGlobe[xCoordinate][yCoordinate];
 		newPatch.addOccupant(entity);
-		entityIndex.put(entity, newPatch);
+		currentFreePatches.remove(newPatch);
+		currentEntityIndex.put(entity, newPatch);
 	}
 
 	// TODO refactor
-	private LinkedList<Patch<T>> nearPatchesOf(T entity, int scope) {
+	private LinkedList<Patch<T>> nearPatchesOf(Patch<T>[][] globe, int xCoordinate, int yCoordinate, int scope) {
 		LinkedList<Patch<T>> nearPatches = new LinkedList<Patch<T>>();
-		Patch<T> origin = entityIndex.get(entity);
+		Patch<T> origin = globe[xCoordinate][yCoordinate];
 
 		int startX = -1;
 		int startY = -1;
@@ -163,16 +205,6 @@ public class World<T extends IEntity> implements IWorld<T> {
 		}
 
 		return nearPatches;
-	}
-
-	private LinkedList<Patch<T>> getPatchfield(int x1, int y1, int x2, int y2) {
-		LinkedList<Patch<T>> patches = new LinkedList<Patch<T>>();
-		for (int i = x1; i < x2; i++) {
-			for (int j = y1; j < y2; j++) {
-				patches.add(globe[i][j]);
-			}
-		}
-		return patches;
 	}
 
 }

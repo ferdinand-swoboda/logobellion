@@ -16,7 +16,12 @@ public class Patch<T extends IEntity> {
 		this.occupants = new LinkedList<T>();
 	}
 
-	public LinkedList<T> getOccupants() {
+	public Patch(int xCoordinate, int yCoordinate, LinkedList<T> occupants) {
+		this(xCoordinate, yCoordinate);
+		this.occupants = occupants;
+	}
+
+	public LinkedList<? extends T> getOccupants() {
 		return occupants;
 	}
 
@@ -39,6 +44,14 @@ public class Patch<T extends IEntity> {
 
 	public int getxCoordinate() {
 		return xCoordinate;
+	}
+
+	public void clearOccupants() {
+		occupants.clear();
+	}
+
+	public boolean isOccupied() {
+		return !this.occupants.isEmpty();
 	}
 
 }

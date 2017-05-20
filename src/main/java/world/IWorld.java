@@ -4,15 +4,17 @@ import java.util.List;
 
 public interface IWorld<T extends IEntity> {
 
-	void add(T entity);
+	void enter(List<? extends T> entities);
 
-	void remove(T entity);
+	void clear();
+
+	void synchronise();
 
 	void move(T entity, int scope);
 
 	void moveTo(T entity, T target);
 
-	List<T> neighbourhoodOf(T entity, int scope);
+	List<? extends T> neighbourhoodOf(T entity, int scope);
 
 	int getDimension();
 

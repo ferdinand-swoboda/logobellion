@@ -1,6 +1,7 @@
 package actor;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import world.IWorld;
@@ -21,11 +22,11 @@ public class Cop extends Person {
 
 	@Override
 	public void act() {
-		List<Person> neighbours = this.world.neighbourhoodOf(this, vision);
+		List<? extends Person> neighbours = this.world.neighbourhoodOf(this, vision);
 		neighbours = neighbours.stream().filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel())
 				.collect(Collectors.toList());
-		Agent suspect = (Agent) neighbours.get(random.nextInt(neighbours.size()));
-		suspect.setJail_term(random.nextInt(max_jail_term) + 1);
+		Agent suspect = (Agent) neighbours.get(ThreadLocalRandom.current().nextInt(neighbours.size()));
+		suspect.setJail_term(ThreadLocalRandom.current().nextInt(max_jail_term) + 1);
 		world.moveTo(this, suspect);
 	}
 
