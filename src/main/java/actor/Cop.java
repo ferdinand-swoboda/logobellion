@@ -23,11 +23,14 @@ public class Cop extends Turtle {
 	@Override
 	public void act() {
 		List<? extends Turtle> neighbours = this.world.neighbourhoodOf(this, vision);
-		neighbours = neighbours.stream().filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel())
-				.collect(Collectors.toList());
-		Agent suspect = (Agent) neighbours.get(ThreadLocalRandom.current().nextInt(neighbours.size()));
-		suspect.setJail_term(ThreadLocalRandom.current().nextInt(max_jail_term) + 1);
-		world.moveTo(this, suspect);
+		List<? extends Turtle> nearbyRebels = neighbours.stream()
+				.filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel()).collect(Collectors.toList());
+
+		if (!nearbyRebels.isEmpty()) {
+			Agent suspect = (Agent) nearbyRebels.get(ThreadLocalRandom.current().nextInt(nearbyRebels.size()));
+			suspect.setJail_term(ThreadLocalRandom.current().nextInt(max_jail_term) + 1);
+			world.moveTo(this, suspect);
+		}
 	}
 
 }

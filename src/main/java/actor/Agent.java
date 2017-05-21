@@ -80,7 +80,11 @@ public class Agent extends Turtle {
 		long c = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Cop).count();
 		long a = 1 + world.neighbourhoodOf(this, vision).stream()
 				.filter(p -> p instanceof Agent && p.isActive() && ((Agent) p).isRebel()).count();
-		double estimated_arrest_prob = 1 - Math.pow(2, ((-Rebellion.k) * Math.floor(c / a)));
+		double cop_rebel_ratio = 0;
+		if (a != 0) {
+			cop_rebel_ratio = Math.floor(c / a);
+		}
+		double estimated_arrest_prob = 1 - Math.pow(2, ((-Rebellion.k) * cop_rebel_ratio));
 		return this.risk_aversion * estimated_arrest_prob;
 	}
 
@@ -103,7 +107,11 @@ public class Agent extends Turtle {
 		long nearAgents = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Agent).count();
 		long nearJailedAgents = world.neighbourhoodOf(this, vision).stream()
 				.filter(p -> p instanceof Agent && !p.isActive()).count();
-		legitimacy = (1 + (nearJailedAgents / nearAgents)) * government_legitimacy;
+		double increaseFactor = 0;
+		if (nearAgents != 0) {
+			increaseFactor = nearJailedAgents / nearAgents;
+		}
+		legitimacy = (1 + increaseFactor) * government_legitimacy;
 		return legitimacy;
 	}
 

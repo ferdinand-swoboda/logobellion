@@ -46,8 +46,8 @@ public class World<T extends IEntity> implements IWorld<T> {
 	public void clear() {
 		entityIndex.clear();
 		freePatches.clear();
-		for (int i = 0; i < globe.length; i++) {
-			for (int j = 0; j < globe[i].length; j++) {
+		for (int i = 0; i < getDimension(); i++) {
+			for (int j = 0; j < getDimension(); j++) {
 				globe[i][j].clearOccupants();
 				freePatches.add(globe[i][j]);
 			}
@@ -66,9 +66,13 @@ public class World<T extends IEntity> implements IWorld<T> {
 		List<Patch<T>> neighbourhood = this.nearPatchesOf(patch, scope);
 		List<Patch<T>> freeNeighbourPatches = neighbourhood.stream().filter((Patch<T> p) -> !p.containsActive())
 				.collect(Collectors.toList());
-		Patch<T> newPatch = freeNeighbourPatches.get(ThreadLocalRandom.current().nextInt(freeNeighbourPatches.size()));
 
-		moveTo(entity, newPatch);
+		if (!freeNeighbourPatches.isEmpty()) {
+			Patch<T> newPatch = freeNeighbourPatches
+					.get(ThreadLocalRandom.current().nextInt(freeNeighbourPatches.size()));
+			moveTo(entity, newPatch);
+		}
+
 	}
 
 	@Override
@@ -98,67 +102,30 @@ public class World<T extends IEntity> implements IWorld<T> {
 		entityIndex.put(entity, newPatch);
 	}
 
-	// TODO refactor
-	private LinkedList<Patch<T>> nearPatchesOf(Patch<T> patch, int scope) {
+	private LinkedList<Patch<T>> nearPatchesOf(Patch<T> centre, int scope) {
 		LinkedList<Patch<T>> nearPatches = new LinkedList<Patch<T>>();
-		Patch<T> origin = globe[xCoordinate][yCoordinate];
 
-		int startX = -1;
-		int startY = -1;
-		int endX = -1;
-		int endY = -1;
-		int startX2 = -1;
-		int startY2 = -1;
-		int endX2 = -1;
-		int endY2 = -1;
-		int diff = -1;
+		int startX = mod(centre.getxCoordinate() - scope, getDimension());
+		int startY = mod(centre.getyCoordinate() - scope, getDimension());
 
-		diff = origin.getxCoordinate() - scope;
-		if (diff >= 0) {
-			startX = origin.getxCoordinate() - scope;
-
-			diff = this.getDimension() - startX + (2 * scope);
-			if (diff < 0) {
-				endX = this.getDimension() - 1;
-				startX2 = 0;
-				endX2 = diff;
-			} else {
-				endX = startX + (2 * scope);
+		for (int i = 0; i < scope; i++) {
+			for (int j = 0; j < scope; j++) {
+				int indexX = (startX + i) % getDimension();
+				int indexY = (startY + j) % getDimension();
+				// do not include the centre patch and prevent duplicate patches
+				if (indexX != centre.getxCoordinate() && indexY != centre.getyCoordinate()
+						&& !nearPatches.contains(globe[indexX][indexY])) {
+					nearPatches.add(globe[indexX][indexY]);
+				}
 			}
-
-		} else {
-			startX = 0;
-			endX = startX + (2 * scope) - Math.abs(origin.getxCoordinate() - scope);
-			startX2 = this.getDimension() - Math.abs(origin.getxCoordinate() - scope);
-			endX2 = this.getDimension() - 1;
-		}
-
-		diff = origin.getyCoordinate() - scope;
-		if (diff >= 0) {
-			startY = origin.getyCoordinate() - scope;
-
-			diff = this.getDimension() - startY + (2 * scope);
-			if (diff < 0) {
-				endY = this.getDimension() - 1;
-				startY2 = 0;
-				endY2 = diff;
-			} else {
-				endY = startY + (2 * scope);
-			}
-
-		} else {
-			startY = 0;
-			endY = startY + (2 * scope) - Math.abs(origin.getyCoordinate() - scope);
-			startY2 = getDimension() - Math.abs(origin.getyCoordinate() - scope);
-			endY2 = getDimension() - 1;
-		}
-
-		nearPatches.addAll(getPatchfield(startX, startY, endX, endY));
-		if (startX2 != -1) {
-			nearPatches.addAll(getPatchfield(startX2, startY2, endX2, endY2));
 		}
 
 		return nearPatches;
+	}
+
+	private int mod(int x, int m) {
+		int r = x % m;
+		return r < 0 ? r + m : r;
 	}
 
 }
