@@ -2,7 +2,6 @@ package actor;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import process.Parameters;
 import process.Rebellion;
 import world.IWorld;
 
@@ -20,7 +19,10 @@ public class Agent extends Turtle {
 
 	private double government_legitimacy;
 
-	public Agent(IWorld<Turtle> world, int vision, boolean individual_legitimacy, double government_legitimacy) {
+	private boolean movement;
+
+	public Agent(IWorld<Turtle> world, int vision, boolean individual_legitimacy, double government_legitimacy,
+			boolean movement) {
 		super(world, vision);
 		rebel = false;
 		jail_term = 0;
@@ -28,12 +30,13 @@ public class Agent extends Turtle {
 		this.perceived_hardship = ThreadLocalRandom.current().nextDouble();
 		this.individual_legitimacy = individual_legitimacy;
 		this.government_legitimacy = government_legitimacy;
+		this.movement = movement;
 	}
 
 	@Override
 	public void move() {
 		// only move if not jailed and MOVEMENT enabled
-		if (jail_term == 0 && Parameters.MOVEMENT) {
+		if (jail_term == 0 && movement) {
 			super.move();
 		}
 	}

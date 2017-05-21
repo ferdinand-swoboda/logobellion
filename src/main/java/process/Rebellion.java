@@ -1,7 +1,8 @@
 package process;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,11 +19,7 @@ public class Rebellion {
 	public static double threshold = 0.1;
 	public static double k = 2.3;
 
-	private HashMap<Integer, Integer> numQuietAgents;
-
-	private HashMap<Integer, Integer> numJailedAgents;
-
-	private HashMap<Integer, Integer> numRebels;
+	private StringBuilder results;
 
 	private LinkedList<Agent> agents;
 
@@ -31,12 +28,17 @@ public class Rebellion {
 	private IWorld<Turtle> world;
 
 	public Rebellion(int worldDimension) {
-		numQuietAgents = new HashMap<Integer, Integer>();
-		numJailedAgents = new HashMap<Integer, Integer>();
-		numRebels = new HashMap<Integer, Integer>();
+		results = new StringBuilder("TICKS,DIMENSION,VISION,MAX_JAIL_TERM,MOVEMENT,"
+				+ "INITIAL_COP_DENSITY,INITIAL_AGENT_DENSITY,GOVERNMENT_LEGITIMACY,INDIVIDUAL_LEGITIMACY\n");
+		results.append(Parameters.TICKS + "," + Parameters.DIMENSION + "," + Parameters.VISION + ","
+				+ Parameters.MAX_JAIL_TERM + "," + Parameters.MOVEMENT + "," + Parameters.INITIAL_COP_DENSITY + ","
+				+ Parameters.INITIAL_AGENT_DENSITY + "," + Parameters.GOVERNMENT_LEGITIMACY + ","
+				+ Parameters.INDIVIDUAL_LEGITIMACY + "\n");
+
+		results.append("tick,#QuietAgents,#JailedAgents,#ActiveAgents\n");
 		agents = new LinkedList<Agent>();
-		world = new World<Turtle>(worldDimension);
 		cops = new LinkedList<Cop>();
+		world = new World<Turtle>(worldDimension);
 	}
 
 	public static void main(String[] args) {
@@ -45,7 +47,11 @@ public class Rebellion {
 		Rebellion rebellion = new Rebellion(Parameters.DIMENSION);
 		rebellion.setup();
 		rebellion.go(Parameters.TICKS);
-		rebellion.storeTimeSeries();
+		try {
+			rebellion.export("results.csv");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -62,7 +68,7 @@ public class Rebellion {
 
 		for (int i = 0; i < numberAgents; i++) {
 			Agent agent = new Agent(world, Parameters.VISION, Parameters.INDIVIDUAL_LEGITIMACY,
-					Parameters.GOVERNMENT_LEGITIMACY);
+					Parameters.GOVERNMENT_LEGITIMACY, Parameters.MOVEMENT);
 			agents.add(agent);
 		}
 
@@ -79,8 +85,11 @@ public class Rebellion {
 		}
 	}
 
-	public void storeTimeSeries() {
-		// TODO store results in a NetLogo-compatible csv file
+	// store results in a NetLogo-compatible csv file
+	private void export(String filename) throws IOException {
+		FileWriter fw = new FileWriter(filename, true);
+		fw.write(results.toString());
+		fw.close();
 	}
 
 	// parameters have to be declared in the form
@@ -129,7 +138,7 @@ public class Rebellion {
 		List<Turtle> turtles = Stream.concat(agents.stream(), cops.stream()).collect(Collectors.toList());
 		Collections.shuffle(turtles);
 
-		// randomly go through all persons
+		// randomly go through all turtles
 		for (Turtle turtle : turtles) {
 			// movement rule
 			turtle.move();
@@ -160,9 +169,7 @@ public class Rebellion {
 			}
 		}
 
-		this.numQuietAgents.put(tick, numQuietAgents);
-		this.numJailedAgents.put(tick, numJailedAgents);
-		this.numRebels.put(tick, numRebels);
+		results.append(tick + "," + numQuietAgents + "," + numJailedAgents + "," + numRebels + "\n");
 	}
 
 }
