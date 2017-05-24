@@ -16,37 +16,32 @@ public class Agent extends Turtle {
 	/**
 	 * whether the agent is rebelling
 	 */
-	private boolean rebel;
+	protected boolean rebel;
 
 	/**
 	 * the current jail time left
 	 */
-	private int jail_term;
+	protected int jail_term;
 
 	/**
 	 * the individual risk aversion
 	 */
-	private double risk_aversion;
+	protected double risk_aversion;
 
 	/**
 	 * the individual perceived hardship
 	 */
-	private double perceived_hardship;
-
-	/**
-	 * whether the government legitimacy should be calculated individually
-	 */
-	private boolean individual_legitimacy;
+	protected double perceived_hardship;
 
 	/**
 	 * the initial government legitimacy
 	 */
-	private double government_legitimacy;
+	protected double government_legitimacy;
 
 	/**
 	 * whether this agent is allowed to move
 	 */
-	private boolean movement;
+	protected boolean movement;
 
 	/**
 	 * Creates an agent and initialises it. The agent's risk aversion and
@@ -58,14 +53,12 @@ public class Agent extends Turtle {
 	 * @param government_legitimacy
 	 * @param movement
 	 */
-	public Agent(IWorld<Turtle> world, int vision, boolean individual_legitimacy,
-			double government_legitimacy, boolean movement) {
+	public Agent(IWorld<Turtle> world, int vision, double government_legitimacy, boolean movement) {
 		super(world, vision);
 		rebel = false;
 		jail_term = 0;
 		this.risk_aversion = ThreadLocalRandom.current().nextDouble();
 		this.perceived_hardship = ThreadLocalRandom.current().nextDouble();
-		this.individual_legitimacy = individual_legitimacy;
 		this.government_legitimacy = government_legitimacy;
 		this.movement = movement;
 	}
@@ -158,7 +151,7 @@ public class Agent extends Turtle {
 	 * 
 	 * @return the agent's net risk
 	 */
-	private double net_risk() {
+	protected double net_risk() {
 		// calculate the number of cops nearby
 		long c = world.neighbourhoodOf(this, vision).stream().filter(p -> p instanceof Cop).count();
 		// calculate the number of rebelling agents nearby
@@ -178,51 +171,17 @@ public class Agent extends Turtle {
 	 * 
 	 * @return the agent's grievance level
 	 */
-	private double grievance() {
+	protected double grievance() {
 		return this.perceived_hardship * (1 - this.governmentLegitimacy());
 	}
 
 	/**
 	 * Returns the government legitimacy perceived by the agent
 	 * 
-	 * @return
+	 * @return the government legitimacy perceived by the agent
 	 */
-	private double governmentLegitimacy() {
-		double legitimacy;
-		if (individual_legitimacy) {
-			// EXTENSION
-			// if the extension has been enabled, the government legitimacy will
-			// be calculated for the agent individually
-			legitimacy = individualGovernmentLegitimacy();
-		} else {
-			// otherwise the perceived legitimacy is the one set at creation
-			legitimacy = government_legitimacy;
-		}
-		return legitimacy;
-	}
-
-	/**
-	 * EXTENSION Returns the individually calculated perceived government
-	 * legitimacy on the basis of nearby jailed and free agents
-	 * 
-	 * @return the calculated individual perceived government legitimacy
-	 */
-	private double individualGovernmentLegitimacy() {
-		double legitimacy;
-		// calculate the number of nearby agents
-		long nearAgents = world.neighbourhoodOf(this, vision).stream()
-				.filter(p -> p instanceof Agent).count();
-		// calculate the number of nearby jailed agents
-		long nearJailedAgents = world.neighbourhoodOf(this, vision).stream()
-				.filter(p -> p instanceof Agent && !p.isActive()).count();
-		double increaseFactor = 0;
-		if (nearAgents != 0) {
-			increaseFactor = nearJailedAgents / nearAgents;
-		}
-		// the perceived government legitimacy increases proportionally with the
-		// relative number of nearby jailed agents
-		legitimacy = (1 + increaseFactor) * government_legitimacy;
-		return legitimacy;
+	protected double governmentLegitimacy() {
+		return government_legitimacy;
 	}
 
 }

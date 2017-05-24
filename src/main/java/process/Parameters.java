@@ -45,6 +45,6 @@ public class Parameters {
 	/**
 	 * the number of ticks to run this simulation for
 	 */
-	public static int TICKS = 20;
+	public static int TICKS = 100;
 
 }

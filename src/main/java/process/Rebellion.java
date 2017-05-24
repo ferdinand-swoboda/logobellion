@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import actor.Agent;
 import actor.Cop;
+import actor.ExtendedAgent;
 import actor.Turtle;
 import world.IWorld;
 import world.World;
@@ -116,8 +117,12 @@ public class Rebellion {
 		int numberAgents = (int) Math
 				.floor(Parameters.INITIAL_AGENT_DENSITY * world.getScale() * world.getScale());
 		for (int i = 0; i < numberAgents; i++) {
-			Agent agent = new Agent(world, Parameters.VISION, Parameters.INDIVIDUAL_LEGITIMACY,
-					Parameters.GOVERNMENT_LEGITIMACY, Parameters.MOVEMENT);
+			// enable/disable extended agent behaviour
+			Agent agent = Parameters.INDIVIDUAL_LEGITIMACY
+					? new ExtendedAgent(world, Parameters.VISION, Parameters.GOVERNMENT_LEGITIMACY,
+							Parameters.MOVEMENT)
+					: new Agent(world, Parameters.VISION, Parameters.GOVERNMENT_LEGITIMACY,
+							Parameters.MOVEMENT);
 			agents.add(agent);
 		}
 
