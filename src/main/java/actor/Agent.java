@@ -83,8 +83,8 @@ public class Agent extends Turtle {
 	@Override
 	public void act() {
 		// only act if not jailed
-		if (jail_term == 0) {
-			rebel = (grievance() > net_risk() + Rebellion.threshold) ? true : false;
+		if (isActive()) {
+			rebel = grievance() > (net_risk() + Rebellion.threshold);
 		}
 	}
 
@@ -109,10 +109,10 @@ public class Agent extends Turtle {
 	}
 
 	/**
-	 * Sets the rebel status
+	 * Sets the rebel status to the given one
 	 * 
 	 * @param rebel
-	 *            the new rebel status
+	 *            the rebel to set
 	 */
 	public void setRebel(boolean rebel) {
 		this.rebel = rebel;

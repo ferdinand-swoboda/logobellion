@@ -59,6 +59,7 @@ public class Cop extends Turtle {
 			Agent suspect = (Agent) nearbyRebels
 					.get(ThreadLocalRandom.current().nextInt(nearbyRebels.size()));
 			suspect.setJail_term(ThreadLocalRandom.current().nextInt(max_jail_term) + 1);
+			suspect.setRebel(false);
 			world.moveTo(this, suspect);
 		}
 	}

@@ -104,7 +104,7 @@ public class Rebellion {
 				+ Parameters.INITIAL_COP_DENSITY + "," + Parameters.INITIAL_AGENT_DENSITY + ","
 				+ Parameters.GOVERNMENT_LEGITIMACY + "," + Parameters.INDIVIDUAL_LEGITIMACY + "\n");
 
-		results.append("tick,#QuietAgents,#JailedAgents,#ActiveAgents\n");
+		results.append("tick,#QuietAgents,#JailedAgents,#RebellingAgents\n");
 
 		// create cops
 		int numberCops = (int) Math
