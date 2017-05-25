@@ -119,9 +119,8 @@ public class World<T extends IEntity> implements IWorld<T> {
 		Patch<T> patch = entityIndex.get(entity);
 
 		List<Patch<T>> neighbourhood = this.nearPatchesOf(patch, scope);
-		// calculate the list of nearby unoccupied or occupied by inactive
-		// entites
-		// patches
+		// calculate the list of nearby unoccupied or occupied (by inactive
+		// entities) patches
 		List<Patch<T>> freeNeighbourPatches = neighbourhood.stream()
 				.filter((Patch<T> p) -> !p.containsActive()).collect(Collectors.toList());
 
@@ -131,6 +130,8 @@ public class World<T extends IEntity> implements IWorld<T> {
 					.get(ThreadLocalRandom.current().nextInt(freeNeighbourPatches.size()));
 			moveTo(entity, newPatch);
 		}
+		// if no free nearby patch is available, the entity will stay on its
+		// current patch
 
 	}
 
@@ -190,6 +191,8 @@ public class World<T extends IEntity> implements IWorld<T> {
 
 	/**
 	 * Returns the list of patches within the given scope of the given patch.
+	 * The given patch is not part of the result and the result does not contain
+	 * duplicate patches.
 	 * 
 	 * @param centre
 	 *            the given patch
@@ -207,16 +210,17 @@ public class World<T extends IEntity> implements IWorld<T> {
 		int startX = mod(centre.getxCoordinate() - scope, getScale());
 		int startY = mod(centre.getyCoordinate() - scope, getScale());
 
-		// add the patches of the scope x scope matrix around the centre patch
+		// add the patches of the (scope + 1)*(scope + 1) matrix around the
+		// centre patch
 		// to the list of nearby patches
-		for (int i = 0; i < scope; i++) {
-			for (int j = 0; j < scope; j++) {
+		for (int i = 0; i < 2 * scope + 1; i++) {
+			for (int j = 0; j < 2 * scope + 1; j++) {
 				// consider that the globe matrix wraps around
 				int indexX = (startX + i) % getScale();
 				int indexY = (startY + j) % getScale();
 				// do not include the centre patch and prevent duplicate patches
 				// being added
-				if (indexX != centre.getxCoordinate() && indexY != centre.getyCoordinate()
+				if (!(indexX == centre.getxCoordinate() && indexY == centre.getyCoordinate())
 						&& !nearPatches.contains(globe[indexX][indexY])) {
 					nearPatches.add(globe[indexX][indexY]);
 				}

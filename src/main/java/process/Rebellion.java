@@ -94,6 +94,7 @@ public class Rebellion {
 		agents.clear();
 		cops.clear();
 		world.clear();
+
 		// prepare results file with simulation parameters
 		results = new StringBuilder("TICKS,DIMENSION,VISION,MAX_JAIL_TERM,MOVEMENT,"
 				+ "INITIAL_COP_DENSITY,INITIAL_AGENT_DENSITY,"

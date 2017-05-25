@@ -41,18 +41,6 @@ public class Patch<T extends IEntity> {
 	}
 
 	/**
-	 * Constructs a patch with the given coordinates and the given occupants
-	 * 
-	 * @param xCoordinate
-	 * @param yCoordinate
-	 * @param occupants
-	 */
-	public Patch(int xCoordinate, int yCoordinate, LinkedList<T> occupants) {
-		this(xCoordinate, yCoordinate);
-		this.occupants = occupants;
-	}
-
-	/**
 	 * Returns the occuyping entities
 	 * 
 	 * @return the occupants
@@ -89,7 +77,7 @@ public class Patch<T extends IEntity> {
 	 * @return whether any of the occupying entities is active
 	 */
 	public boolean containsActive() {
-		return !this.occupants.stream().anyMatch((T entity) -> entity.isActive());
+		return this.occupants.stream().anyMatch((T entity) -> entity.isActive());
 	}
 
 	/**

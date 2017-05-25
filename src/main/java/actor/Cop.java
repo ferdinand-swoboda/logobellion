@@ -45,7 +45,7 @@ public class Cop extends Turtle {
 
 	/**
 	 * Randomly selects a rebelling agent in its vision, sets the rebel's jail
-	 * time to a random value between 0 (inclusive) and max_jail_term
+	 * time to a random value between 1 (inclusive) and max_jail_term
 	 * (inclusive) and move to the rebel's location
 	 */
 	@Override

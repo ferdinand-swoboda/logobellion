@@ -12,7 +12,7 @@ public class Parameters {
 	/**
 	 * the initial cop density in the world
 	 */
-	public static double INITIAL_COP_DENSITY = 0.04;
+	public static double INITIAL_COP_DENSITY = 0.10;
 	/**
 	 * the initial agent density in the world
 	 */
@@ -20,7 +20,7 @@ public class Parameters {
 	/**
 	 * a turtle's vision
 	 */
-	public static int VISION = 7;
+	public static int VISION = 1;
 	/**
 	 * the initial government legitimacy perceived by every agent
 	 */
@@ -32,7 +32,7 @@ public class Parameters {
 	/**
 	 * whether agents can move or not
 	 */
-	public static boolean MOVEMENT = true;
+	public static boolean MOVEMENT = false;
 	/**
 	 * EXTENSION whether the perceived government legitimacy is calculated for
 	 * each agent individually or not
@@ -41,7 +41,7 @@ public class Parameters {
 	/**
 	 * the scale of the two-dimensional square world
 	 */
-	public static int SCALE = 50;
+	public static int SCALE = 4;
 	/**
 	 * the number of ticks to run this simulation for
 	 */
